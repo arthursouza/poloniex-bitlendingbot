@@ -115,6 +115,9 @@
     <Compile Include="TradingTools\Trade.Interface.cs" />
     <Compile Include="TradingTools\Trading.cs" />
     <Compile Include="TradingTools\Trading.Interface.cs" />
+    <Compile Include="WalletTools\ActiveLoanList.cs" />
+    <Compile Include="WalletTools\ActiveLoan.cs" />
+    <Compile Include="WalletTools\OpenLoanOffer.cs" />
     <Compile Include="WalletTools\Balance.cs" />
     <Compile Include="WalletTools\Balance.Interface.cs" />
     <Compile Include="WalletTools\DepositWithdrawalList.cs" />

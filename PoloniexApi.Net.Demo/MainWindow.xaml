@@ -1,0 +1,9 @@
+﻿<Window x:Class="Jojatekok.PoloniexAPI.Demo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="poloniex bot"
+        Width="798.868" Height="425.985">
+    <Grid Margin="10">
+        <DataGrid x:Name="dataGrid" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="355" Width="751"/>
+    </Grid>
+</Window>

@@ -44,7 +44,7 @@ namespace Jojatekok.PoloniexAPI
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        internal static T DeserializeObject<T>(this JsonSerializer serializer, string value)
+        public static T DeserializeObject<T>(this JsonSerializer serializer, string value)
         {
             using (var stringReader = new StringReader(value)) {
                 using (var jsonTextReader = new JsonTextReader(stringReader)) {
