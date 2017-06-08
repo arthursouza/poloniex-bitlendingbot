@@ -34,6 +34,15 @@ namespace Jojatekok.PoloniexAPI.MarketTools
             return data;
         }
 
+        private ILoanOrders GetLoanOrders(string currency)
+        {
+            var data = GetData<LoanOrders>(
+                "returnLoanOrders",
+                "currency=" + currency
+            );
+            return data;
+        }
+
         private IList<ITrade> GetTrades(CurrencyPair currencyPair)
         {
             var data = GetData<IList<Trade>>(
@@ -79,6 +88,11 @@ namespace Jojatekok.PoloniexAPI.MarketTools
         public Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair)
         {
             return Task.Factory.StartNew(() => GetTrades(currencyPair));
+        }
+
+        public Task<ILoanOrders> GetLoanOrdersAsync(string currency)
+        {
+            return Task.Factory.StartNew(() => GetLoanOrders(currency));
         }
 
         public Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)

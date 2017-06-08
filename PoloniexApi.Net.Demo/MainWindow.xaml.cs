@@ -13,7 +13,12 @@ namespace Jojatekok.PoloniexAPI.Demo
     {
         private PoloniexClient PoloniexClient { get; set; }
         System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-        
+
+        private List<ActiveLoan> myLoanHistory;
+        private List<ActiveLoan> publicLoanHistory;
+
+        private List<ActiveLoan> myLoans;
+
         
         public MainWindow()
         {
@@ -23,88 +28,50 @@ namespace Jojatekok.PoloniexAPI.Demo
             InitializeComponent();
 
             PoloniexClient = new PoloniexClient(ApiKeys.PublicKey, ApiKeys.PrivateKey);
-            LoadMarketSummaryAsync();
+            LoadInformation();
             
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-            dispatcherTimer.Interval = new TimeSpan(0, 1, 0);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 20);
             dispatcherTimer.Start();
         }
 
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            LoadMarketSummaryAsync();
+            LoadInformation();
         }
 
-        private async void LoadMarketSummaryAsync()
+        private async void LoadInformation()
         {
-            var json = new JsonSerializer();
-            var savedLoans = new List<ActiveLoan>();
-            var closedLoans = new List<ActiveLoan>();
+            //var activeLoans = await PoloniexClient.Wallet.GetActiveLoansAsync();
 
-            if (File.Exists("savedLoans.txt"))
-            {
-                var jsonString = File.ReadAllText("savedLoans.txt");
-                savedLoans = json.DeserializeObject<List<ActiveLoan>>(jsonString);
-            }
-            if (File.Exists("closedloans.txt"))
-            {
-                var jsonString = File.ReadAllText("closedloans.txt");
-                closedLoans = json.DeserializeObject<List<ActiveLoan>>(jsonString);
-            }
-            
-            var activeLoans = await PoloniexClient.Wallet.GetActiveLoansAsync();
+            var loans = await PoloniexClient.Markets.GetLoanOrdersAsync("BTC");
 
-            if (!savedLoans.Any())
-            {
-                if (activeLoans != null && activeLoans.Provided.Any())
-                {
-                    savedLoans = activeLoans.Provided.ToList();
-                }
-            }
-            else
-            {
-                if (activeLoans == null || !activeLoans.Provided.Any())
-                {
-                    closedLoans = new List<ActiveLoan>(savedLoans);
-                    savedLoans.Clear();
-                }
-                else
-                {
-                    var recentlyAdded = activeLoans.Provided.Where(al => savedLoans.All(sl => sl.Id != al.Id)).ToList();
-                    foreach (var loan in recentlyAdded)
-                    {
-                        savedLoans.Add(loan);
-                    }
 
-                    var recentlyClosed = savedLoans.Where(cl => activeLoans.Provided.All(al => al.Id != cl.Id)).ToList();
-                    foreach (var loan in recentlyClosed)
-                    {
-                        var removed = savedLoans.FirstOrDefault(l => l.Id == loan.Id);
-                        savedLoans.Remove(removed);
-                    }
-                    closedLoans.AddRange(recentlyClosed);
-                }
-            }
 
-            dataGrid.Name = "Active Loans"
+            //foreach (var loan in activeLoans.Provided)
+            //{
+            //    var profit = loan.Amount * DateTime.Now.Subtract(loan.Date).TotalDays * loan.Rate;
 
-            foreach (var loan in savedLoans)
-            {
-                var item = new
-                {
-                    loan.Amount,
-                    loan.Date,
-                    loan.Rate,
-                    loan.Fees,
-                    loan.
-                }
-            }
+            //    var item = new
+            //    {
+            //        loan.Amount,
+            //        loan.Date,
+            //        loan.Rate,
+            //        loan.Fees,
+            //        Profit = profit,
+            //    };
 
-            
+            //    //if(dataGrid.Items.)
 
-            File.WriteAllText("savedLoans.txt", JsonConvert.SerializeObject(savedLoans));
-            File.WriteAllText("closedloans.txt", JsonConvert.SerializeObject(closedLoans));
+
+            //    dataGrid.Items.Add(item);
+            //}
+        }
+
+        private void dataGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

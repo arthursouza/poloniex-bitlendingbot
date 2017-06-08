@@ -89,6 +89,10 @@
     <Compile Include="General\ObservableDictionary.cs" />
     <Compile Include="LiveTools\Live.cs" />
     <Compile Include="LiveTools\Live.Interface.cs" />
+    <Compile Include="MarketTools\LoanOrders.cs" />
+    <Compile Include="MarketTools\LoanOrders.Interface.cs" />
+    <Compile Include="MarketTools\ILoanOrder.Interface.cs" />
+    <Compile Include="MarketTools\LoanOrder.cs" />
     <Compile Include="MarketTools\OrderBook.Interface.cs" />
     <Compile Include="MarketTools\OrderBook.cs" />
     <Compile Include="PoloniexClient.cs" />

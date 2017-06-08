@@ -15,6 +15,8 @@ namespace Jojatekok.PoloniexAPI
         /// <param name="depth">The number of orders to fetch from each side.</param>
         Task<IOrderBook> GetOpenOrdersAsync(CurrencyPair currencyPair, uint depth = 50);
 
+        Task<ILoanOrders> GetLoanOrdersAsync(string currency);
+
         /// <summary>Fetches the last 200 trades of a given market.</summary>
         /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
         Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair);
