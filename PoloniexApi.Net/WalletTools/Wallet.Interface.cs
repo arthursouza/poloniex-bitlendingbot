@@ -18,7 +18,9 @@ namespace Jojatekok.PoloniexAPI
         /// <param name="endTime">The time to stop fetching data at.</param>
         Task<IDepositWithdrawalList> GetDepositsAndWithdrawalsAsync(DateTime startTime, DateTime endTime);
 
-        Task<IDictionary<string, OpenLoanOffer>> GetOpenLoanOffersAsync();
+        Task<List<OpenLoanOffer>> GetOpenLoanOffersAsync();
+
+        Task<IDictionary<string, LendingBalance>> GetAvailableAccountBalancesAsync(string account);
 
         Task<ActiveLoanList> GetActiveLoansAsync();
 
@@ -54,5 +56,8 @@ namespace Jojatekok.PoloniexAPI
         /// </param>
         /// <param name="address">The address you wish to withdraw to.</param>
         Task PostWithdrawalAsync(string currency, double amount, string address);
+        
+        Task<string> CancelOpenLoanOfferAsync(string orderNumber);
+        Task<string> CreateLoanOfferAsync(CreateLoanOffer model);
     }
 }

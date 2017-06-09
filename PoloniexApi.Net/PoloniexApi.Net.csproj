@@ -113,6 +113,7 @@
     <Compile Include="MarketTools\Order.Interface.cs" />
     <Compile Include="MarketTools\Trade.cs" />
     <Compile Include="MarketTools\Trade.Interface.cs" />
+    <Compile Include="Repository.cs" />
     <Compile Include="TradingTools\Order.cs" />
     <Compile Include="TradingTools\Order.Interface.cs" />
     <Compile Include="TradingTools\Trade.cs" />
@@ -121,6 +122,8 @@
     <Compile Include="TradingTools\Trading.Interface.cs" />
     <Compile Include="WalletTools\ActiveLoanList.cs" />
     <Compile Include="WalletTools\ActiveLoan.cs" />
+    <Compile Include="WalletTools\LendingBalance.cs" />
+    <Compile Include="WalletTools\CreateLoanOffer.cs" />
     <Compile Include="WalletTools\OpenLoanOffer.cs" />
     <Compile Include="WalletTools\Balance.cs" />
     <Compile Include="WalletTools\Balance.Interface.cs" />
