@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
-    public class DepositWithdrawalList : IDepositWithdrawalList
+    public class DepositWithdrawalList
     {
         [JsonProperty("deposits")]
-        public IList<Deposit> Deposits { get; private set; }
+        public List<Deposit> Deposits { get; private set; }
 
         [JsonProperty("withdrawals")]
-        public IList<Withdrawal> Withdrawals { get; private set; }
+        public List<Withdrawal> Withdrawals { get; private set; }
     }
 }

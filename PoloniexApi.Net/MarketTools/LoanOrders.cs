@@ -4,12 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class LoanOrders : ILoanOrders
+    public class LoanOrders
     {
         [JsonProperty("demands")]
-        public IList<LoanOrder> Demands { get; set; }
+        public List<LoanOrder> Demands { get; set; }
 
         [JsonProperty("offers")]
-        public IList<LoanOrder> Offers { get; set; }
+        public List<LoanOrder> Offers { get; set; }
     }
 }

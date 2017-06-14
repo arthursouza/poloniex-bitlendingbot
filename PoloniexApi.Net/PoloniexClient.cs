@@ -11,14 +11,14 @@ namespace Jojatekok.PoloniexAPI
         public IAuthenticator Authenticator { get; private set; }
 
         /// <summary>A class which contains market tools for the client.</summary>
-        public IMarkets Markets { get; private set; }
+        public Markets Markets { get; private set; }
         /// <summary>A class which contains trading tools for the client.</summary>
-        public ITrading Trading { get; private set; }
+        public Trading Trading { get; private set; }
         /// <summary>A class which contains wallet tools for the client.</summary>
-        public IWallet Wallet { get; private set; }
+        public Wallet Wallet { get; private set; }
         /// <summary>A class which represents live data fetched automatically from the server.</summary>
-        public ILive Live { get; private set; }
-
+        public Live Live { get; private set; }
+        
         /// <summary>Creates a new instance of Poloniex API .NET's client service.</summary>
         /// <param name="publicApiKey">Your public API key.</param>
         /// <param name="privateApiKey">Your private API key.</param>

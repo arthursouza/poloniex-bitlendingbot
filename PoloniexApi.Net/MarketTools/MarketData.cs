@@ -2,7 +2,7 @@
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class MarketData : IMarketData
+    public class MarketData
     {
         [JsonProperty("last")]
         public double PriceLast { get; internal set; }

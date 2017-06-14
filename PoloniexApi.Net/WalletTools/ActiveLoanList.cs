@@ -33,9 +33,9 @@ namespace Jojatekok.PoloniexAPI.WalletTools
         */
 
         [JsonProperty("provided")]
-        public IList<ActiveLoan> Provided { get; private set; }
+        public List<ActiveLoan> Provided { get; private set; }
 
         [JsonProperty("used")]
-        public IList<ActiveLoan> Used { get; private set; }
+        public List<ActiveLoan> Used { get; private set; }
     }
 }

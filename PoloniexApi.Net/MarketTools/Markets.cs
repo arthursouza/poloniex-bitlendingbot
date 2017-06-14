@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class Markets : IMarkets
+    public class Markets
     {
         private ApiWebClient ApiWebClient { get; set; }
 
@@ -15,16 +15,16 @@ namespace Jojatekok.PoloniexAPI.MarketTools
             ApiWebClient = apiWebClient;
         }
 
-        private IDictionary<CurrencyPair, IMarketData> GetSummary()
+        private IDictionary<CurrencyPair, MarketData> GetSummary()
         {
             var data = GetData<IDictionary<string, MarketData>>("returnTicker");
             return data.ToDictionary(
                 x => CurrencyPair.Parse(x.Key),
-                x => (IMarketData)x.Value
+                x => (MarketData)x.Value
             );
         }
 
-        private IOrderBook GetOpenOrders(CurrencyPair currencyPair, uint depth)
+        private OrderBook GetOpenOrders(CurrencyPair currencyPair, uint depth)
         {
             var data = GetData<OrderBook>(
                 "returnOrderBook",
@@ -34,7 +34,7 @@ namespace Jojatekok.PoloniexAPI.MarketTools
             return data;
         }
 
-        private ILoanOrders GetLoanOrders(string currency)
+        private LoanOrders GetLoanOrders(string currency)
         {
             var data = GetData<LoanOrders>(
                 "returnLoanOrders",
@@ -43,74 +43,74 @@ namespace Jojatekok.PoloniexAPI.MarketTools
             return data;
         }
 
-        private IList<ITrade> GetTrades(CurrencyPair currencyPair)
+        private List<Trade> GetTrades(CurrencyPair currencyPair)
         {
-            var data = GetData<IList<Trade>>(
+            var data = GetData<List<Trade>>(
                 "returnTradeHistory",
                 "currencyPair=" + currencyPair
             );
-            return new List<ITrade>(data);
+            return new List<Trade>(data);
         }
 
-        private IList<ITrade> GetTrades(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
+        private List<Trade> GetTrades(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
         {
-            var data = GetData<IList<Trade>>(
+            var data = GetData<List<Trade>>(
                 "returnTradeHistory",
                 "currencyPair=" + currencyPair,
                 "start=" + Helper.DateTimeToUnixTimeStamp(startTime),
                 "end=" + Helper.DateTimeToUnixTimeStamp(endTime)
             );
-            return new List<ITrade>(data);
+            return new List<Trade>(data);
         }
 
-        private IList<IMarketChartData> GetChartData(CurrencyPair currencyPair, MarketPeriod period, DateTime startTime, DateTime endTime)
+        private List<MarketChartData> GetChartData(CurrencyPair currencyPair, MarketPeriod period, DateTime startTime, DateTime endTime)
         {
-            var data = GetData<IList<MarketChartData>>(
+            var data = GetData<List<MarketChartData>>(
                 "returnChartData",
                 "currencyPair=" + currencyPair,
                 "start=" + Helper.DateTimeToUnixTimeStamp(startTime),
                 "end=" + Helper.DateTimeToUnixTimeStamp(endTime),
                 "period=" + (int)period
             );
-            return new List<IMarketChartData>(data);
+            return new List<MarketChartData>(data);
         }
 
-        public Task<IDictionary<CurrencyPair, IMarketData>> GetSummaryAsync()
+        public Task<IDictionary<CurrencyPair, MarketData>> GetSummaryAsync()
         {
             return Task.Factory.StartNew(() => GetSummary());
         }
 
-        public Task<IOrderBook> GetOpenOrdersAsync(CurrencyPair currencyPair, uint depth)
+        public Task<OrderBook> GetOpenOrdersAsync(CurrencyPair currencyPair, uint depth)
         {
             return Task.Factory.StartNew(() => GetOpenOrders(currencyPair, depth));
         }
 
-        public Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair)
+        public Task<List<Trade>> GetTradesAsync(CurrencyPair currencyPair)
         {
             return Task.Factory.StartNew(() => GetTrades(currencyPair));
         }
 
-        public Task<ILoanOrders> GetLoanOrdersAsync(string currency)
+        public Task<LoanOrders> GetLoanOrdersAsync(string currency)
         {
             return Task.Factory.StartNew(() => GetLoanOrders(currency));
         }
 
-        public Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
+        public Task<List<Trade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
         {
             return Task.Factory.StartNew(() => GetTrades(currencyPair, startTime, endTime));
         }
 
-        public Task<IList<IMarketChartData>> GetChartDataAsync(CurrencyPair currencyPair, MarketPeriod period, DateTime startTime, DateTime endTime)
+        public Task<List<MarketChartData>> GetChartDataAsync(CurrencyPair currencyPair, MarketPeriod period, DateTime startTime, DateTime endTime)
         {
             return Task.Factory.StartNew(() => GetChartData(currencyPair, period, startTime, endTime));
         }
 
-        public Task<IList<IMarketChartData>> GetChartDataAsync(CurrencyPair currencyPair, MarketPeriod period)
+        public Task<List<MarketChartData>> GetChartDataAsync(CurrencyPair currencyPair, MarketPeriod period)
         {
             return Task.Factory.StartNew(() => GetChartData(currencyPair, period, Helper.DateTimeUnixEpochStart, DateTime.MaxValue));
         }
 
-        public Task<IList<IMarketChartData>> GetChartDataAsync(CurrencyPair currencyPair)
+        public Task<List<MarketChartData>> GetChartDataAsync(CurrencyPair currencyPair)
         {
             return Task.Factory.StartNew(() => GetChartData(currencyPair, MarketPeriod.Minutes30, Helper.DateTimeUnixEpochStart, DateTime.MaxValue));
         }

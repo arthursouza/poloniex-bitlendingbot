@@ -3,7 +3,7 @@ using System;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class Trade : ITrade
+    public class Trade
     {
         [JsonProperty("date")]
         private string TimeInternal {

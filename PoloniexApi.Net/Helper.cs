@@ -114,7 +114,7 @@ namespace Jojatekok.PoloniexAPI
             return (output);
         }
 
-        public static double[] GetBollingerBandsWithSimpleMovingAverage(this IList<IMarketChartData> value, int index, int period = 20)
+        public static double[] GetBollingerBandsWithSimpleMovingAverage(this List<MarketChartData> value, int index, int period = 20)
         {
             var closes = new List<double>(period);
             for (var i = index; i > Math.Max(index - period, -1); i--) {

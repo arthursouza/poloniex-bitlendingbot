@@ -58,21 +58,26 @@ namespace BitLendingBot.App
         {
             try
             {
+                if (botLog.Text.Length > 10000)
+                {
+                    botLog.Text = string.Empty;
+                }
+
                 var loans = await poloniexClient.Markets.GetLoanOrdersAsync("BTC");
-                
+
                 var loanOfferHistory = repository.SaveCurrentLoanOrders(loans);
 
                 // perhaps I should only check the rates of current offers to be more competitive
                 var highrate = CalculateHighLoanRate(loanOfferHistory);
                 var lowrate = CalculateLowLoanRate(loanOfferHistory);
 
-                LogLine($"Checking current rates: Low {lowrate:P} High {highrate:P}");
+                LogLine($"Checking current rates: Low {lowrate:P4} High {highrate:P4}");
 
                 // wait to avoid being blocked by poloniex
                 Thread.Sleep(500);
                 // get your active loans
                 var activeLoans = await poloniexClient.Wallet.GetActiveLoansAsync();
-                
+
                 #region Log current active loans
                 if (activeLoans.Provided.Any())
                 {
@@ -83,59 +88,75 @@ namespace BitLendingBot.App
 
                     foreach (var loan in activeLoans.Provided)
                     {
-                        var earned = (DateTime.Now.Subtract(loan.Date).TotalDays * loan.Rate * loan.Amount);
+                        var earned = (DateTime.Now.ToUniversalTime().Subtract(loan.Date).TotalDays * loan.Rate * loan.Amount);
                         totalEarned += earned;
                         avgRate += loan.Rate;
                         totalAmount += loan.Amount;
 
-                        LogLine($"{loan.Amount} BTC || {loan.Rate:P} rate || {earned:0.00000000} earned");
+                        LogLine($"{loan.Amount:0.00000000} BTC || {loan.Rate:P4} rate || {earned:0.00000000} earned");
                     }
 
-                    LogLine($"Total Active || {totalAmount:N} BTC || {(avgRate / activeLoans.Provided.Count):P} rate || {totalEarned:0.00000000} earned");
+                    LogLine($"Total Active || {totalAmount:0.00000000} BTC || {(avgRate / activeLoans.Provided.Count):P4} rate || {totalEarned:0.00000000} earned");
                 }
                 else
                 {
                     LogLine("No active loans.");
                 }
                 #endregion
-                
+
                 // wait to avoid being blocked by poloniex
                 Thread.Sleep(500);
                 var openLoanOffers = await poloniexClient.Wallet.GetOpenLoanOffersAsync();
-                if (openLoanOffers.Any())
+                if (openLoanOffers.Any() && openLoanOffers.ContainsKey("BTC"))
                 {
-                    LogLine($"Reopening {openLoanOffers.Count} loan offers.");
+                    if (openLoanOffers["BTC"].Any())
+                    {
+                        LogLine($"Reopening {openLoanOffers["BTC"].Count} loan offers.");
+                        // cancel the loan offers currently open
+                        foreach (var loan in openLoanOffers["BTC"])
+                        {
+                            // wait to avoid being blocked by poloniex
+                            Thread.Sleep(500);
+                            var result = await poloniexClient.Wallet.CancelOpenLoanOfferAsync(loan.Id.ToString());
+                            LogLine("Return from cancelLoanOffer command: " + result);
+                        }
+                    }
                 }
 
-                // cancel the loan offers currently open
-                foreach (var loan in openLoanOffers)
-                {
-                    // wait to avoid being blocked by poloniex
-                    Thread.Sleep(500);
-                    var result = await poloniexClient.Wallet.CancelOpenLoanOfferAsync(loan.Id.ToString());
-                    LogLine("Return from cancelLoanOffer command: " + result);
-                }
 
                 // wait to avoid being blocked by poloniex
                 Thread.Sleep(500);
                 // get current lending balance
                 var balances = await poloniexClient.Wallet.GetAvailableAccountBalancesAsync("lending");
-                var btcBalance = balances["lending"];
-
                 // reopen loan offers based on the updated rates
-                if (btcBalance.BTC > 0)
+                
+                if (balances.ContainsKey("lending"))
                 {
-                    var offerCreated = new CreateLoanOffer()
+                    var lendingBalance = balances["lending"];
+                    
+                    if (lendingBalance.BTC.HasValue)
                     {
-                        Amount = btcBalance.BTC.Value,
-                        LendingRate = lowrate,
-                        Currency = "BTC"
-                    };
+                        var offerCreated = new CreateLoanOffer()
+                        {
+                            Amount = lendingBalance.BTC.Value,
+                            LendingRate = lowrate,
+                            Currency = "BTC"
+                        };
 
-                    // wait to avoid being blocked by poloniex
-                    Thread.Sleep(500);
-                    var createLoanOfferResult = await poloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
-                    LogLine($"Loan offer created: {offerCreated.Amount} BTC - {offerCreated.LendingRate:P} rate");
+                        LogLine($"Available lending balance: {offerCreated.Amount:0.00000000} BTC");
+
+                        if (lendingBalance.BTC.Value > 0.01)
+                        {
+                            // wait to avoid being blocked by poloniex
+                            Thread.Sleep(500);
+                            var createLoanOfferResult = await poloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
+                            LogLine($"Loan offer created: {offerCreated.Amount:0.00000000} BTC - {offerCreated.LendingRate:P4} rate");
+                        }
+                        else
+                        {
+                            LogLine("Skipping low available lending balance");
+                        }
+                    }
                 }
 
                 // get total value in open offers
@@ -150,7 +171,8 @@ namespace BitLendingBot.App
             }
             finally
             {
-                File.WriteAllText(currentLogFile, botLog.Text);
+                //File.WriteAllText(currentLogFile, botLog.Text);
+                
             }
         }
 

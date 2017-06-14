@@ -2,7 +2,7 @@
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
-    public class Balance : IBalance
+    public class Balance
     {
         [JsonProperty("available")]
         public double QuoteAvailable { get; private set; }

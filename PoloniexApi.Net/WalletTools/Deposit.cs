@@ -3,7 +3,7 @@ using System;
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
-    public class Deposit : IDeposit
+    public class Deposit
     {
         [JsonProperty("currency")]
         public string Currency { get; private set; }

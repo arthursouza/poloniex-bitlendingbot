@@ -110,20 +110,31 @@ namespace Jojatekok.PoloniexAPI.Demo
 
                 // get current lending balance
                 var balances = await PoloniexClient.Wallet.GetAvailableAccountBalancesAsync("lending");
-                var btcBalance = balances["lending"];
+                var lendingBalance = balances["lending"];
 
                 // reopen loan offers based on the updated rates
-                if (btcBalance.BTC > 0)
+                if (lendingBalance.Any())
                 {
-                    var offerCreated = new CreateLoanOffer()
+                    var balance = lendingBalance.Select(b => b.BTC).FirstOrDefault();
+                    
+                    if (balance.HasValue)
                     {
-                        Amount = btcBalance.BTC.Value,
-                        LendingRate = lowrate,
-                        Currency = "BTC"
-                    };
+                        LogLine(string.Format("Lending balance of {balance.Value:0.00000000} BTC available"));
 
-                    var createLoanOfferResult = await PoloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
-                    LogLine(string.Format("Loan offer created: {0} BTC - {1} rate", offerCreated.Amount, offerCreated.LendingRate.ToString("P")));
+                        if (balance.Value > 0.01)
+                        {
+                            var offerCreated = new CreateLoanOffer()
+                            {
+                                Amount = balance.Value,
+                                LendingRate = lowrate,
+                                Currency = "BTC"
+                            };
+
+                            //var createLoanOfferResult = await PoloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
+                            LogLine("Skipping loan offer creation for now.");
+                            LogLine(string.Format("Loan offer created: {0} BTC - {1} rate", offerCreated.Amount, offerCreated.LendingRate.ToString("P")));
+                        }
+                    }
                 }
 
                 // get total value in open offers
@@ -138,7 +149,30 @@ namespace Jojatekok.PoloniexAPI.Demo
             }
             finally
             {
-                File.WriteAllText(currentLogFile, LendingLog.Text);
+                try
+                {
+                    //File.WriteAllText(currentLogFile, LendingLog.Text);
+                    if (LendingLog.Text.Contains('\n'))
+                    {
+                        var logLines = LendingLog.Text.Split('\n');
+                        if (logLines.Length > 3000)
+                        {
+                            var newLines = new string[] { };
+                            logLines.CopyTo(newLines, 2500);
+                            LendingLog.Text = string.Empty;
+                            LendingLog.AppendText(string.Join(@"\n", newLines));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (LendingLog.Text.Length > 10000)
+                    {
+                        LendingLog.Text = string.Empty;
+                    }
+
+                    LogLine(ex.ToString());
+                }
             }
         }
 

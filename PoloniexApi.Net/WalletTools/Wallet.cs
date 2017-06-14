@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
-    public class Wallet : IWallet
+    public class Wallet
     {
         private ApiWebClient ApiWebClient { get; set; }
 
@@ -15,30 +16,52 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             ApiWebClient = apiWebClient;
         }
 
-        private IDictionary<string, Balance> GetBalances()
+        private Dictionary<string, Balance> GetBalances()
         {
             var postData = new Dictionary<string, object>();
 
-            var data = PostData<IDictionary<string, Balance>>("returnCompleteBalances", postData);
+            var data = PostData<Dictionary<string, Balance>>("returnCompleteBalances", postData);
             return data;
         }
         
-        private IDictionary<string, LendingBalance> GetAvailableAccountBalances(string account)
+        private Dictionary<string, LendingBalance> GetAvailableAccountBalances(string account)
         {
             var postData = new Dictionary<string, object> {
                 { "account", account },
             };
 
-            var data = PostData<IDictionary<string, LendingBalance>>("returnAvailableAccountBalances", postData);
-            return data;
+            var data = PostData<Dictionary<string, object>>("returnAvailableAccountBalances", postData);
+
+            if (!string.IsNullOrEmpty(account))
+            {
+                var balance = data[account];
+                JsonSerializer js = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore};
+                try
+                {
+                    var balanceValue = js.DeserializeObject<LendingBalance>(balance.ToString());
+                    if (balanceValue is LendingBalance)
+                    {
+                        return new Dictionary<string, LendingBalance>
+                        {
+                            { "lending", balanceValue}
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // ignore
+                }
+            }
+
+            return new Dictionary<string, LendingBalance>();
         }
 
-        private List<OpenLoanOffer> GetOpenLoanOffers()
+        private Dictionary<string, List<OpenLoanOffer>> GetOpenLoanOffers()
         {
             //TODO
             var postData = new Dictionary<string, object>();
             
-            return PostData<List<OpenLoanOffer>>("returnOpenLoanOffers", postData);
+            return PostData<Dictionary<string, List<OpenLoanOffer>>>("returnOpenLoanOffers", postData);
         }
 
         private ActiveLoanList GetActiveLoans()
@@ -49,15 +72,15 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             return data;
         }
         
-        private IDictionary<string, string> GetDepositAddresses()
+        private Dictionary<string, string> GetDepositAddresses()
         {
             var postData = new Dictionary<string, object>();
 
-            var data = PostData<IDictionary<string, string>>("returnDepositAddresses", postData);
+            var data = PostData<Dictionary<string, string>>("returnDepositAddresses", postData);
             return data;
         }
 
-        private IDepositWithdrawalList GetDepositsAndWithdrawals(DateTime startTime, DateTime endTime)
+        private DepositWithdrawalList GetDepositsAndWithdrawals(DateTime startTime, DateTime endTime)
         {
             var postData = new Dictionary<string, object> {
                 { "start", Helper.DateTimeToUnixTimeStamp(startTime) },
@@ -68,13 +91,13 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             return data;
         }
 
-        private IGeneratedDepositAddress PostGenerateNewDepositAddress(string currency)
+        private GeneratedDepositAddress PostGenerateNewDepositAddress(string currency)
         {
             var postData = new Dictionary<string, object> {
                 { "currency", currency }
             };
 
-            var data = PostData<IGeneratedDepositAddress>("generateNewAddress", postData);
+            var data = PostData<GeneratedDepositAddress>("generateNewAddress", postData);
             return data;
         }
 
@@ -90,19 +113,19 @@ namespace Jojatekok.PoloniexAPI.WalletTools
                 postData.Add("paymentId", paymentId);
             }
 
-            PostData<IGeneratedDepositAddress>("withdraw", postData);
+            PostData<GeneratedDepositAddress>("withdraw", postData);
         }
         
-        private string CancelOpenLoanOffer(string orderNumber)
+        private object CancelOpenLoanOffer(string orderNumber)
         {
             var postData = new Dictionary<string, object> {
                 { "orderNumber", orderNumber },
             };
             
-            return PostData<string>("cancelLoanOffer", postData);
+            return PostData<object>("cancelLoanOffer", postData);
         }
 
-        private string CreateLoanOffer(CreateLoanOffer model)
+        private object CreateLoanOffer(CreateLoanOffer model)
         {
             //"currency", "amount", "duration", "autoRenew" (0 or 1), and "lendingRate"
             var postData = new Dictionary<string, object> {
@@ -113,20 +136,20 @@ namespace Jojatekok.PoloniexAPI.WalletTools
                 { "autoRenew", 0 },
             };
             
-            return PostData<string>("createLoanOffer", postData);
+            return PostData<object>("createLoanOffer", postData);
         }
 
-        public Task<IDictionary<string, Balance>> GetBalancesAsync()
+        public Task<Dictionary<string, Balance>> GetBalancesAsync()
         {
             return Task.Factory.StartNew(() => GetBalances());
         }
 
-        public Task<IDictionary<string, LendingBalance>> GetAvailableAccountBalancesAsync(string account)
+        public Task<Dictionary<string, LendingBalance>> GetAvailableAccountBalancesAsync(string account)
         {
             return Task.Factory.StartNew(() => GetAvailableAccountBalances(account));
         }
 
-        public Task<List<OpenLoanOffer>> GetOpenLoanOffersAsync()
+        public Task<Dictionary<string, List<OpenLoanOffer>>> GetOpenLoanOffersAsync()
         {
             return Task.Factory.StartNew(() => GetOpenLoanOffers());
         }
@@ -136,22 +159,22 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             return Task.Factory.StartNew(() => GetActiveLoans());
         }
 
-        public Task<IDictionary<string, string>> GetDepositAddressesAsync()
+        public Task<Dictionary<string, string>> GetDepositAddressesAsync()
         {
             return Task.Factory.StartNew(() => GetDepositAddresses());
         }
 
-        public Task<IDepositWithdrawalList> GetDepositsAndWithdrawalsAsync(DateTime startTime, DateTime endTime)
+        public Task<DepositWithdrawalList> GetDepositsAndWithdrawalsAsync(DateTime startTime, DateTime endTime)
         {
             return Task.Factory.StartNew(() => GetDepositsAndWithdrawals(startTime, endTime));
         }
 
-        public Task<IDepositWithdrawalList> GetDepositsAndWithdrawalsAsync()
+        public Task<DepositWithdrawalList> GetDepositsAndWithdrawalsAsync()
         {
             return Task.Factory.StartNew(() => GetDepositsAndWithdrawals(Helper.DateTimeUnixEpochStart, DateTime.MaxValue));
         }
 
-        public Task<IGeneratedDepositAddress> PostGenerateNewDepositAddressAsync(string currency)
+        public Task<GeneratedDepositAddress> PostGenerateNewDepositAddressAsync(string currency)
         {
             return Task.Factory.StartNew(() => PostGenerateNewDepositAddress(currency));
         }
@@ -166,18 +189,18 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             return Task.Factory.StartNew(() => PostWithdrawal(currency, amount, address, null));
         }
         
-        public Task<string> CreateLoanOfferAsync(CreateLoanOffer model)
+        public Task<object> CreateLoanOfferAsync(CreateLoanOffer model)
         {
-            return Task<string>.Factory.StartNew(() => CreateLoanOffer(model));
+            return Task<object>.Factory.StartNew(() => CreateLoanOffer(model));
         }
 
-        public Task<string> CancelOpenLoanOfferAsync(string orderNumber)
+        public Task<object> CancelOpenLoanOfferAsync(string orderNumber)
         {
-            return Task<string>.Factory.StartNew(() => CancelOpenLoanOffer(orderNumber));
+            return Task<object>.Factory.StartNew(() => CancelOpenLoanOffer(orderNumber));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T PostData<T>(string command, Dictionary<string, object> postData)
+        private T PostData<T>(string command, Dictionary<string, object> postData) where T : new()
         {
             return ApiWebClient.PostData<T>(command, postData);
         }

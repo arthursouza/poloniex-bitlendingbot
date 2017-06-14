@@ -32,7 +32,7 @@ namespace Jojatekok.PoloniexAPI
             File.WriteAllText(jsonFile, jsonObject);
         }
 
-        public List<LoanOrder> SaveCurrentLoanOrders(ILoanOrders loanOrders)
+        public List<LoanOrder> SaveCurrentLoanOrders(LoanOrders loanOrders)
         {
             var loanOffers = LoadObject<List<LoanOrder>>(loanOfferHistory);
             //var loanDemands = LoadObject<List<LoanOrder>>(loanDemandHistory);

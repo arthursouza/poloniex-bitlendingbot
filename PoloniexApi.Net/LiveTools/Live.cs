@@ -8,7 +8,7 @@ using WampSharp.V2.Realm;
 
 namespace Jojatekok.PoloniexAPI.LiveTools
 {
-    public class Live : ILive
+    public class Live
     {
         private const string SubjectNameTicker = "ticker";
         private const string SubjectNameTrollbox = "trollbox";

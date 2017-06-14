@@ -1,6 +1,6 @@
 ﻿namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class Order : IOrder
+    public class Order
     {
         public double PricePerCoin { get; private set; }
 

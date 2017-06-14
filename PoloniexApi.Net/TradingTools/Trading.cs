@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Jojatekok.PoloniexAPI.TradingTools
 {
-    public class Trading : ITrading
+    public class Trading
     {
         private ApiWebClient ApiWebClient { get; set; }
 
@@ -15,17 +15,17 @@ namespace Jojatekok.PoloniexAPI.TradingTools
             ApiWebClient = apiWebClient;
         }
 
-        private IList<IOrder> GetOpenOrders(CurrencyPair currencyPair)
+        private List<Order> GetOpenOrders(CurrencyPair currencyPair)
         {
             var postData = new Dictionary<string, object> {
                 { "currencyPair", currencyPair }
             };
 
-            var data = PostData<IList<Order>>("returnOpenOrders", postData);
-            return (IList<IOrder>)data;
+            var data = PostData<List<Order>>("returnOpenOrders", postData);
+            return (List<Order>)data;
         }
 
-        private IList<ITrade> GetTrades(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
+        private List<Trade> GetTrades(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
         {
             var postData = new Dictionary<string, object> {
                 { "currencyPair", currencyPair },
@@ -33,8 +33,8 @@ namespace Jojatekok.PoloniexAPI.TradingTools
                 { "end", Helper.DateTimeToUnixTimeStamp(endTime) }
             };
 
-            var data = PostData<IList<Trade>>("returnTradeHistory", postData);
-            return (IList<ITrade>)data;
+            var data = PostData<List<Trade>>("returnTradeHistory", postData);
+            return (List<Trade>)data;
         }
 
         private ulong PostOrder(CurrencyPair currencyPair, OrderType type, double pricePerCoin, double amountQuote)
@@ -60,17 +60,17 @@ namespace Jojatekok.PoloniexAPI.TradingTools
             return data.Value<byte>("success") == 1;
         }
 
-        public Task<IList<IOrder>> GetOpenOrdersAsync(CurrencyPair currencyPair)
+        public Task<List<Order>> GetOpenOrdersAsync(CurrencyPair currencyPair)
         {
             return Task.Factory.StartNew(() => GetOpenOrders(currencyPair));
         }
 
-        public Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
+        public Task<List<Trade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
         {
             return Task.Factory.StartNew(() => GetTrades(currencyPair, startTime, endTime));
         }
 
-        public Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair)
+        public Task<List<Trade>> GetTradesAsync(CurrencyPair currencyPair)
         {
             return Task.Factory.StartNew(() => GetTrades(currencyPair, Helper.DateTimeUnixEpochStart, DateTime.MaxValue));
         }
@@ -86,7 +86,7 @@ namespace Jojatekok.PoloniexAPI.TradingTools
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T PostData<T>(string command, Dictionary<string, object> postData)
+        private T PostData<T>(string command, Dictionary<string, object> postData) where T : new()
         {
             return ApiWebClient.PostData<T>(command, postData);
         }

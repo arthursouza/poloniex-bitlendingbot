@@ -88,12 +88,8 @@
     <Compile Include="General\EventArgs\TrollboxMessageEventArgs.cs" />
     <Compile Include="General\ObservableDictionary.cs" />
     <Compile Include="LiveTools\Live.cs" />
-    <Compile Include="LiveTools\Live.Interface.cs" />
     <Compile Include="MarketTools\LoanOrders.cs" />
-    <Compile Include="MarketTools\LoanOrders.Interface.cs" />
-    <Compile Include="MarketTools\ILoanOrder.Interface.cs" />
     <Compile Include="MarketTools\LoanOrder.cs" />
-    <Compile Include="MarketTools\OrderBook.Interface.cs" />
     <Compile Include="MarketTools\OrderBook.cs" />
     <Compile Include="PoloniexClient.cs" />
     <Compile Include="Helper.cs" />
@@ -103,16 +99,11 @@
     <Compile Include="General\JsonResponse.cs" />
     <Compile Include="General\OrderType.cs" />
     <Compile Include="MarketTools\MarketData.cs" />
-    <Compile Include="MarketTools\MarketData.Interface.cs" />
     <Compile Include="MarketTools\MarketChartData.cs" />
-    <Compile Include="MarketTools\MarketChartData.Interface.cs" />
     <Compile Include="MarketTools\MarketPeriod.cs" />
     <Compile Include="MarketTools\Markets.cs" />
-    <Compile Include="MarketTools\Markets.Interface.cs" />
     <Compile Include="MarketTools\Order.cs" />
-    <Compile Include="MarketTools\Order.Interface.cs" />
     <Compile Include="MarketTools\Trade.cs" />
-    <Compile Include="MarketTools\Trade.Interface.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="TradingTools\Order.cs" />
     <Compile Include="TradingTools\Order.Interface.cs" />
@@ -126,17 +117,11 @@
     <Compile Include="WalletTools\CreateLoanOffer.cs" />
     <Compile Include="WalletTools\OpenLoanOffer.cs" />
     <Compile Include="WalletTools\Balance.cs" />
-    <Compile Include="WalletTools\Balance.Interface.cs" />
     <Compile Include="WalletTools\DepositWithdrawalList.cs" />
-    <Compile Include="WalletTools\DepositWithdrawalList.Interface.cs" />
-    <Compile Include="WalletTools\GeneratedDepositAddress.Interface.cs" />
     <Compile Include="WalletTools\GeneratedDepositAddress.cs" />
     <Compile Include="WalletTools\Deposit.cs" />
-    <Compile Include="WalletTools\Deposit.Interface.cs" />
     <Compile Include="WalletTools\Wallet.cs" />
-    <Compile Include="WalletTools\Wallet.Interface.cs" />
     <Compile Include="WalletTools\Withdrawal.cs" />
-    <Compile Include="WalletTools\Withdrawal.Interface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

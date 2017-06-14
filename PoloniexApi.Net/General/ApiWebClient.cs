@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography;
@@ -45,15 +46,31 @@ namespace Jojatekok.PoloniexAPI
             return output;
         }
 
-        public T PostData<T>(string command, Dictionary<string, object> postData)
+        public T PostData<T>(string command, Dictionary<string, object> postData) where T : new()
         {
-            postData.Add("command", command);
-            postData.Add("nonce", Helper.GetCurrentHttpPostNonce());
+            var jsonString = string.Empty;
+            try
+            {
+                postData.Add("command", command);
+                postData.Add("nonce", Helper.GetCurrentHttpPostNonce());
+                jsonString = PostString(Helper.ApiUrlHttpsRelativeTrading, postData.ToHttpPostString());
 
-            var jsonString = PostString(Helper.ApiUrlHttpsRelativeTrading, postData.ToHttpPostString());
-            var output = JsonSerializer.DeserializeObject<T>(jsonString);
+                if (jsonString == "[]" || jsonString == "{}" || string.IsNullOrEmpty(jsonString))
+                {
+                    return new T();
+                }
 
-            return output;
+                var output = JsonSerializer.DeserializeObject<T>(jsonString);
+                return output;
+            }
+            catch (Exception ex)
+            {
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    throw new Exception("Error. Json String: "+jsonString + "."+Environment.NewLine + ex.ToString());
+                }
+                throw ex;
+            }
         }
 
         private string QueryString(string relativeUrl)

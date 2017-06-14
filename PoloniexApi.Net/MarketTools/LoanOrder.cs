@@ -2,7 +2,7 @@
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class LoanOrder : ILoanOrder
+    public class LoanOrder
     {
         internal LoanOrder()
         {

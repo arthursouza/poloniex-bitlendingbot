@@ -5,24 +5,24 @@ using System.Runtime.CompilerServices;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class OrderBook : IOrderBook
+    public class OrderBook
     {
         [JsonProperty("bids")]
-        private IList<string[]> BuyOrdersInternal {
+        private List<string[]> BuyOrdersInternal {
             set { BuyOrders = ParseOrders(value); }
         }
-        public IList<IOrder> BuyOrders { get; private set; }
+        public List<Order> BuyOrders { get; private set; }
 
         [JsonProperty("asks")]
-        private IList<string[]> SellOrdersInternal {
+        private List<string[]> SellOrdersInternal {
             set { SellOrders = ParseOrders(value); }
         }
-        public IList<IOrder> SellOrders { get; private set; }
+        public List<Order> SellOrders { get; private set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static IList<IOrder> ParseOrders(IList<string[]> orders)
+        private static List<Order> ParseOrders(List<string[]> orders)
         {
-            var output = new List<IOrder>(orders.Count);
+            var output = new List<Order>(orders.Count);
             for (var i = 0; i < orders.Count; i++) {
                 output.Add(
                     new Order(

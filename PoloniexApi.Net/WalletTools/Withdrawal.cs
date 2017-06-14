@@ -3,7 +3,7 @@ using System;
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
-    public class Withdrawal : IWithdrawal
+    public class Withdrawal
     {
         [JsonProperty("withdrawalNumber")]
         public ulong Id { get; private set; }

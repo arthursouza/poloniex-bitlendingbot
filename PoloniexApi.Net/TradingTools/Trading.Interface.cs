@@ -9,17 +9,17 @@ namespace Jojatekok.PoloniexAPI
     {
         /// <summary>Fetches the current open orders in your account, ordered by most recent first.</summary>
         /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
-        Task<IList<IOrder>> GetOpenOrdersAsync(CurrencyPair currencyPair);
+        Task<List<IOrder>> GetOpenOrdersAsync(CurrencyPair currencyPair);
 
         /// <summary>Fetches the trades made in your account, ordered by most recent first.</summary>
         /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
-        Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair);
+        Task<List<ITrade>> GetTradesAsync(CurrencyPair currencyPair);
 
         /// <summary>Fetches the trades made in your account in a given time period, ordered by most recent first.</summary>
         /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
         /// <param name="startTime">The time to start fetching data from.</param>
         /// <param name="endTime">The time to stop fetching data at.</param>
-        Task<IList<ITrade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime);
+        Task<List<ITrade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime);
 
         /// <summary>Submits a new order to the market.</summary>
         /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>

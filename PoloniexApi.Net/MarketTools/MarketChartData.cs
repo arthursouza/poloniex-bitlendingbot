@@ -3,7 +3,7 @@ using System;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
-    public class MarketChartData  : IMarketChartData
+    public class MarketChartData
     {
         [JsonProperty("date")]
         private ulong TimeInternal {

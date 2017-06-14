@@ -2,7 +2,7 @@
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
-    public class GeneratedDepositAddress : IGeneratedDepositAddress
+    public class GeneratedDepositAddress
     {
         [JsonProperty("success")]
         private byte IsGenerationSuccessfulInternal {
