@@ -12,10 +12,10 @@ namespace Jojatekok.PoloniexAPI
 {
     public class Repository
     {
-        private string loanDemandHistory = "loan_demand_history.json";
-        private string loanOfferHistory = "loan_offer_history.json";
+        private string myLoanHistory = @"C:\\lendingbotlogs\my_loan_history.json";
+        private string publicLoanOfferHistory = @"C:\\lendingbotlogs\public_loan_offer_history.json";
 
-        private T LoadObject<T>(string jsonFile) where T : new()
+        public static T LoadObject<T>(string jsonFile) where T : new()
         {
             if (File.Exists(jsonFile))
             {
@@ -26,47 +26,36 @@ namespace Jojatekok.PoloniexAPI
             return new T();
         }
         
-        private void SaveObject<T>(T entity, string jsonFile) where T : new()
+        public static void SaveObject<T>(T entity, string jsonFile) where T : new()
         {
             var jsonObject = JsonConvert.SerializeObject(entity);
             File.WriteAllText(jsonFile, jsonObject);
         }
 
-        public List<LoanOrder> SaveCurrentLoanOrders(LoanOrders loanOrders)
+        public List<ActiveLoan> GetLoanHistory()
         {
-            var loanOffers = LoadObject<List<LoanOrder>>(loanOfferHistory);
-            //var loanDemands = LoadObject<List<LoanOrder>>(loanDemandHistory);
+            return LoadObject<List<ActiveLoan>>(myLoanHistory);
+        }
 
-            //foreach (var order in loanOrders.Demands)
-            //{
-            //    order.Date = DateTime.Now;
-            //    loanDemands.Add(order);
-            //}
+        public void SaveLoanHistory(List<ActiveLoan> list)
+        {
+            SaveObject(list, myLoanHistory);
+        }
 
+        public List<LoanOrder> SavePublicLoansAndLoadHistory(LoanOrders loanOrders)
+        {
+            var loanOffers = LoadObject<List<LoanOrder>>(publicLoanOfferHistory);
             foreach (var order in loanOrders.Offers)
             {
                 order.Date = DateTime.Now;
                 loanOffers.Add(order);
             }
-
-            //if (loanDemands.Count > 5000)
-            //{
-            //    loanDemands = loanDemands.OrderByDescending(l => l.Date).Take(5000).ToList();
-            //}
             if (loanOffers.Count > 5000)
             {
                 loanOffers = loanOffers.OrderByDescending(l => l.Date).Take(5000).ToList();
             }
-
-            //SaveObject(loanDemands, loanDemandHistory);
-            SaveObject(loanOffers, loanOfferHistory);
-
+            SaveObject(loanOffers, publicLoanOfferHistory);
             return loanOffers;
-        }
-
-        public void SaveCurrentLendingbalance(double balance)
-        {
-            SaveObject(balance, "lendingbalance.json");
         }
     }
 }
