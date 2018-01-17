@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoloniexApi.Net", "PoloniexApi.Net\PoloniexApi.Net.csproj", "{BC5546FA-4F27-4A57-ABE0-2691D1E8B51C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitLendingBot.App", "BitLendingBot.App\BitLendingBot.App.csproj", "{18228F53-B726-4AE9-A0C6-3F94FFAACBAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LendingBotApp", "BitLendingBot.App\LendingBotApp.csproj", "{18228F53-B726-4AE9-A0C6-3F94FFAACBAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

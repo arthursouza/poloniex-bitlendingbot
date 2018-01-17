@@ -13,38 +13,37 @@ namespace BitLendingBot.App
 {
     public partial class AppForm : Form
     {
-        private PoloniexClient poloniexClient;
-        private Repository repository;
-        private string currentLogFile = @"C:\lendingbotlogs\bitbotlog.json";
-        private string btcDollarFile = @"C:\lendingbotlogs\btcdollar.json";
-
-        double btcDollar = 0f;
-
-        private int intervalBetweenLoops = 2 * 60 * 1000;
-        private int intervalBetweenCalls = 15000;
-
+        private readonly PoloniexClient poloniexClient;
+        private readonly Repository repository;
+        private readonly BotConfig config;
+        
         public AppForm()
         {
             InitializeComponent();
 
-            if (!Directory.Exists(@"C:\lendingbotlogs"))
+            if (!File.Exists("config.json"))
             {
-                Directory.CreateDirectory(@"C:\lendingbotlogs");
+                config = new BotConfig();
+                Repository.SaveObject(config, "config.json");
             }
-
+            else
+            {
+                config = Repository.LoadObject<BotConfig>("config.json");
+            }
+            
+            if (!Directory.Exists(config.BotFilesFolder))
+            {
+                Directory.CreateDirectory(config.BotFilesFolder);
+            }
+            
             poloniexClient = new PoloniexClient(ApiKeys.PublicKey, ApiKeys.PrivateKey);
             repository = new Repository();
 
             // generate a log file for this execution
-            currentLogFile += " " + DateTime.Now.Ticks + ".txt";
-
-            btcDollar = Repository.LoadObject<double>(btcDollarFile);
-            txtBTCDollar.Text = btcDollar.ToString("0.00000000");
-
             // initial call to the information gathering method
             ProcessInformation();
 
-            timer.Interval = 60 * 1000;
+            timer.Interval = config.IntervalBetweenLoops;
             timer.Enabled = true;
             timer.Start();
 
@@ -58,8 +57,8 @@ namespace BitLendingBot.App
 
         private static double CalculateLowLoanRate(IEnumerable<LoanOrder> loanOfferHistory)
         {
-            var avgRate30minBottom10 = loanOfferHistory.Where(l => l.Date >= DateTime.Now.AddMinutes(-30)).OrderBy(l => l.Date).Take(10).Average(l => l.Rate);
-            return avgRate30minBottom10;
+            var avgRate30MinBottom10 = loanOfferHistory.Where(l => l.Date >= DateTime.Now.AddMinutes(-30)).OrderBy(l => l.Date).Take(10).Average(l => l.Rate);
+            return avgRate30MinBottom10;
         }
 
         private static double CalculateHighLoanRate(IEnumerable<LoanOrder> loanOfferHistory)
@@ -72,8 +71,7 @@ namespace BitLendingBot.App
         {
             try
             {
-                var loanHistory = repository.GetLoanHistory();
-                ProcessLoanHistoryData(loanHistory);
+                var loanHistory = repository.GetLoanHistory(config.MyLoanHistory);
                 
                 if (botLog.Text.Length > 10000)
                 {
@@ -81,7 +79,7 @@ namespace BitLendingBot.App
                 }
 
                 var loans = await poloniexClient.Markets.GetLoanOrdersAsync("BTC");
-                var loanOfferHistory = repository.SavePublicLoansAndLoadHistory(loans);
+                var loanOfferHistory = repository.SavePublicLoansAndLoadHistory(loans, config.PublicLoanOfferHistory);
                 
                 // perhaps I should only check the rates of current offers to be more competitive
                 var highrate = CalculateHighLoanRate(loanOfferHistory);
@@ -90,7 +88,7 @@ namespace BitLendingBot.App
                 LogLine($"Checking current rates: Low {lowrate:P4} High {highrate:P4}");
 
                 // wait to avoid being blocked by poloniex
-                Thread.Sleep(intervalBetweenCalls);
+                Thread.Sleep(config.IntervalBetweenCalls);
                 // get your active loans
                 var activeLoans = await poloniexClient.Wallet.GetActiveLoansAsync();
 
@@ -125,10 +123,10 @@ namespace BitLendingBot.App
                 }
                 #endregion
 
-                repository.SaveLoanHistory(loanHistory);
+                repository.SaveLoanHistory(loanHistory, config.MyLoanHistory);
 
                 // wait to avoid being blocked by poloniex
-                Thread.Sleep(intervalBetweenCalls);
+                Thread.Sleep(config.IntervalBetweenCalls);
                 var openLoanOffers = await poloniexClient.Wallet.GetOpenLoanOffersAsync();
                 if (openLoanOffers.Any() && openLoanOffers.ContainsKey("BTC"))
                 {
@@ -139,39 +137,45 @@ namespace BitLendingBot.App
                         foreach (var loan in openLoanOffers["BTC"])
                         {
                             // wait to avoid being blocked by poloniex
-                            Thread.Sleep(intervalBetweenCalls);
+                            Thread.Sleep(config.IntervalBetweenCalls);
                             var result = await poloniexClient.Wallet.CancelOpenLoanOfferAsync(loan.Id.ToString());
                             LogLine("Return from cancelLoanOffer command: " + result);
                         }
                     }
                 }
-
-
+                
                 // wait to avoid being blocked by poloniex
-                Thread.Sleep(500);
+                Thread.Sleep(config.IntervalBetweenCalls);
                 // get current lending balance
                 var balances = await poloniexClient.Wallet.GetAvailableAccountBalancesAsync("lending");
                 // reopen loan offers based on the updated rates
-                
+
+                // wait to avoid being blocked by poloniex
+                Thread.Sleep(config.IntervalBetweenCalls);
+
                 if (balances.ContainsKey("lending"))
                 {
                     var lendingBalance = balances["lending"];
                     
                     if (lendingBalance.BTC.HasValue)
                     {
-                        var offerCreated = new CreateLoanOffer()
-                        {
-                            Amount = lendingBalance.BTC.Value,
-                            LendingRate = lowrate,
-                            Currency = "BTC"
-                        };
+                        var lendingBalanceBTC = lendingBalance.BTC.Value;
+                        
+                        LogLine($"Available lending balance: {lendingBalanceBTC:0.00000000} BTC");
 
-                        LogLine($"Available lending balance: {offerCreated.Amount:0.00000000} BTC");
+                        var amountCurrentlyLent = activeLoans.Provided.Any() ? activeLoans.Provided.Sum(al => al.Amount) : 0;
+                        var totalBalance = lendingBalanceBTC + amountCurrentlyLent;
+                        var amountLeftToLend = totalBalance * config.PercentageToLend - amountCurrentlyLent;
 
-                        if (lendingBalance.BTC.Value > 0.01)
+                        if (amountLeftToLend > 0.01)
                         {
-                            // wait to avoid being blocked by poloniex
-                            Thread.Sleep(intervalBetweenCalls);
+                            var offerCreated = new CreateLoanOffer()
+                            {
+                                Amount = amountLeftToLend,
+                                LendingRate = lowrate,
+                                Currency = "BTC"
+                            };
+
                             var createLoanOfferResult = await poloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
                             LogLine($"Loan offer created: {offerCreated.Amount:0.00000000} BTC - {offerCreated.LendingRate:P4} rate");
                         }
@@ -197,55 +201,16 @@ namespace BitLendingBot.App
                 //File.WriteAllText(currentLogFile, botLog.Text);
             }
         }
-
-        private void ProcessLoanHistoryData(List<ActiveLoan> loanHistory)
-        {
-            var lastYear = loanHistory.Where(l => l.Date >= DateTime.Now.AddYears(-1)).SumEarned();
-            var lastMonth = loanHistory.Where(l => l.Date >= DateTime.Now.AddMonths(-1)).SumEarned();
-            var lastWeek = loanHistory.Where(l => l.Date >= DateTime.Now.AddDays(-7)).SumEarned();
-            var lastDay = loanHistory.Where(l => l.Date >= DateTime.Now.AddDays(-1)).SumEarned();
-            var lastHour = loanHistory.Where(l => l.Date >= DateTime.Now.AddHours(-1)).SumEarned();
-            var total = loanHistory.SumEarned();
-
-            txtDayBTC.Text = lastDay.ToString("0.00000000");
-            txtHourBtc.Text = lastHour.ToString("0.00000000");
-            txtWeekBTC.Text = lastWeek.ToString("0.00000000");
-            txtMonthBTC.Text = lastMonth.ToString("0.00000000");
-            txtYearBtc.Text = lastYear.ToString("0.00000000");
-            txtTotalBTC.Text = total.ToString("0.00000000");
-
-            txtDollarHour.Text = (lastHour * btcDollar).ToString("0.00000000");
-            txtDollarDay.Text = (lastDay * btcDollar).ToString("0.00000000");
-            txtDollarWeek.Text = (lastWeek * btcDollar).ToString("0.00000000");
-            txtDollarMonth.Text = (lastMonth * btcDollar).ToString("0.00000000");
-            txtDollarYear.Text = (lastYear * btcDollar).ToString("0.00000000");
-            txtDollarTotal.Text = (total * btcDollar).ToString("0.00000000");
-        }
-
+        
         private void LogLine(string text)
         {
             botLog.AppendText(DateTime.Now.ToString("dd/MM HH:mm:ss") + ": " + text + Environment.NewLine);
-            //botLog.Text += DateTime.Now.ToString("dd/MM HH:mm:ss") + ": " + text + Environment.NewLine;
         }
 
         private void timer_Tick(object sender, EventArgs e)
         {
             // start the background worker
             worker.RunWorkerAsync();
-        }
-
-        private void txtBTCDollar_TextChanged(object sender, EventArgs e)
-        {
-            double.TryParse(txtBTCDollar.Text, out btcDollar);
-            Repository.SaveObject(btcDollar, currentLogFile);
-        }
-    }
-
-    public static class MyExtensions
-    {
-        public static double SumEarned(this IEnumerable<ActiveLoan> list)
-        {
-            return list.Sum(l => DateTime.Now.ToUniversalTime().Subtract(l.Date).TotalDays * l.Rate * l.Amount);
         }
     }
 }

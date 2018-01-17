@@ -12,9 +12,6 @@ namespace Jojatekok.PoloniexAPI
 {
     public class Repository
     {
-        private string myLoanHistory = @"C:\\lendingbotlogs\my_loan_history.json";
-        private string publicLoanOfferHistory = @"C:\\lendingbotlogs\public_loan_offer_history.json";
-
         public static T LoadObject<T>(string jsonFile) where T : new()
         {
             if (File.Exists(jsonFile))
@@ -32,19 +29,19 @@ namespace Jojatekok.PoloniexAPI
             File.WriteAllText(jsonFile, jsonObject);
         }
 
-        public List<ActiveLoan> GetLoanHistory()
+        public List<ActiveLoan> GetLoanHistory(string filepath)
         {
-            return LoadObject<List<ActiveLoan>>(myLoanHistory);
+            return LoadObject<List<ActiveLoan>>(filepath);
         }
 
-        public void SaveLoanHistory(List<ActiveLoan> list)
+        public void SaveLoanHistory(List<ActiveLoan> list, string filepath)
         {
-            SaveObject(list, myLoanHistory);
+            SaveObject(list, filepath);
         }
 
-        public List<LoanOrder> SavePublicLoansAndLoadHistory(LoanOrders loanOrders)
+        public List<LoanOrder> SavePublicLoansAndLoadHistory(LoanOrders loanOrders, string filepath)
         {
-            var loanOffers = LoadObject<List<LoanOrder>>(publicLoanOfferHistory);
+            var loanOffers = LoadObject<List<LoanOrder>>(filepath);
             foreach (var order in loanOrders.Offers)
             {
                 order.Date = DateTime.Now;
@@ -54,7 +51,7 @@ namespace Jojatekok.PoloniexAPI
             {
                 loanOffers = loanOffers.OrderByDescending(l => l.Date).Take(5000).ToList();
             }
-            SaveObject(loanOffers, publicLoanOfferHistory);
+            SaveObject(loanOffers, filepath);
             return loanOffers;
         }
     }
