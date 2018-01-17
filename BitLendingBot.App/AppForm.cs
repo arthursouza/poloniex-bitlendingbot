@@ -13,12 +13,19 @@ namespace BitLendingBot.App
 {
     public partial class AppForm : Form
     {
+        private readonly BotConfig config;
         private readonly PoloniexClient poloniexClient;
         private readonly Repository repository;
-        private readonly BotConfig config;
-        
+
         public AppForm()
         {
+            if (string.IsNullOrEmpty(ApiKeys.PublicKey) || string.IsNullOrEmpty(ApiKeys.PrivateKey))
+            {
+                MessageBox.Show("Please set the api keys before running the lending bot.");
+                Load += (s, e) => Close();
+                return;
+            }
+
             InitializeComponent();
 
             if (!File.Exists("config.json"))
@@ -30,12 +37,12 @@ namespace BitLendingBot.App
             {
                 config = Repository.LoadObject<BotConfig>("config.json");
             }
-            
+
             if (!Directory.Exists(config.BotFilesFolder))
             {
                 Directory.CreateDirectory(config.BotFilesFolder);
             }
-            
+
             poloniexClient = new PoloniexClient(ApiKeys.PublicKey, ApiKeys.PrivateKey);
             repository = new Repository();
 
@@ -63,8 +70,8 @@ namespace BitLendingBot.App
 
         private static double CalculateHighLoanRate(IEnumerable<LoanOrder> loanOfferHistory)
         {
-            var avgRate30minBottom40 = loanOfferHistory.Where(l => l.Date >= DateTime.Now.AddMinutes(-30)).OrderBy(l => l.Date).Take(40).Average(l => l.Rate);
-            return avgRate30minBottom40;
+            var avgRate30MinBottom40 = loanOfferHistory.Where(l => l.Date >= DateTime.Now.AddMinutes(-30)).OrderBy(l => l.Date).Take(40).Average(l => l.Rate);
+            return avgRate30MinBottom40;
         }
 
         private async void ProcessInformation()
@@ -72,7 +79,7 @@ namespace BitLendingBot.App
             try
             {
                 var loanHistory = repository.GetLoanHistory(config.MyLoanHistory);
-                
+
                 if (botLog.Text.Length > 10000)
                 {
                     botLog.Text = string.Empty;
@@ -80,7 +87,7 @@ namespace BitLendingBot.App
 
                 var loans = await poloniexClient.Markets.GetLoanOrdersAsync("BTC");
                 var loanOfferHistory = repository.SavePublicLoansAndLoadHistory(loans, config.PublicLoanOfferHistory);
-                
+
                 // perhaps I should only check the rates of current offers to be more competitive
                 var highrate = CalculateHighLoanRate(loanOfferHistory);
                 var lowrate = CalculateLowLoanRate(loanOfferHistory);
@@ -93,6 +100,7 @@ namespace BitLendingBot.App
                 var activeLoans = await poloniexClient.Wallet.GetActiveLoansAsync();
 
                 #region Log current active loans
+
                 if (activeLoans.Provided.Any())
                 {
                     LogLine($"Currently {activeLoans.Provided.Count} active loans.");
@@ -102,7 +110,7 @@ namespace BitLendingBot.App
 
                     foreach (var loan in activeLoans.Provided)
                     {
-                        var earned = (DateTime.Now.ToUniversalTime().Subtract(loan.Date).TotalDays * loan.Rate * loan.Amount);
+                        var earned = DateTime.Now.ToUniversalTime().Subtract(loan.Date).TotalDays * loan.Rate * loan.Amount;
                         totalEarned += earned;
                         avgRate += loan.Rate;
                         totalAmount += loan.Amount;
@@ -115,12 +123,13 @@ namespace BitLendingBot.App
                         }
                     }
 
-                    LogLine($"Total Active || {totalAmount:0.00000000} BTC || {(avgRate / activeLoans.Provided.Count):P4} rate || {totalEarned:0.00000000} earned");
+                    LogLine($"Total Active || {totalAmount:0.00000000} BTC || {avgRate / activeLoans.Provided.Count:P4} rate || {totalEarned:0.00000000} earned");
                 }
                 else
                 {
                     LogLine("No active loans.");
                 }
+
                 #endregion
 
                 repository.SaveLoanHistory(loanHistory, config.MyLoanHistory);
@@ -143,7 +152,7 @@ namespace BitLendingBot.App
                         }
                     }
                 }
-                
+
                 // wait to avoid being blocked by poloniex
                 Thread.Sleep(config.IntervalBetweenCalls);
                 // get current lending balance
@@ -156,27 +165,27 @@ namespace BitLendingBot.App
                 if (balances.ContainsKey("lending"))
                 {
                     var lendingBalance = balances["lending"];
-                    
-                    if (lendingBalance.BTC.HasValue)
+
+                    if (lendingBalance.Btc.HasValue)
                     {
-                        var lendingBalanceBTC = lendingBalance.BTC.Value;
-                        
-                        LogLine($"Available lending balance: {lendingBalanceBTC:0.00000000} BTC");
+                        var lendingBalanceBtc = lendingBalance.Btc.Value;
+
+                        LogLine($"Available lending balance: {lendingBalanceBtc:0.00000000} BTC");
 
                         var amountCurrentlyLent = activeLoans.Provided.Any() ? activeLoans.Provided.Sum(al => al.Amount) : 0;
-                        var totalBalance = lendingBalanceBTC + amountCurrentlyLent;
+                        var totalBalance = lendingBalanceBtc + amountCurrentlyLent;
                         var amountLeftToLend = totalBalance * config.PercentageToLend - amountCurrentlyLent;
 
                         if (amountLeftToLend > 0.01)
                         {
-                            var offerCreated = new CreateLoanOffer()
+                            var offerCreated = new CreateLoanOffer
                             {
                                 Amount = amountLeftToLend,
                                 LendingRate = lowrate,
                                 Currency = "BTC"
                             };
 
-                            var createLoanOfferResult = await poloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
+                            await poloniexClient.Wallet.CreateLoanOfferAsync(offerCreated);
                             LogLine($"Loan offer created: {offerCreated.Amount:0.00000000} BTC - {offerCreated.LendingRate:P4} rate");
                         }
                         else
@@ -194,14 +203,10 @@ namespace BitLendingBot.App
             }
             catch (Exception ex)
             {
-                LogLine("Error: " + ex.ToString());
-            }
-            finally
-            {
-                //File.WriteAllText(currentLogFile, botLog.Text);
+                LogLine("Error: " + ex);
             }
         }
-        
+
         private void LogLine(string text)
         {
             botLog.AppendText(DateTime.Now.ToString("dd/MM HH:mm:ss") + ": " + text + Environment.NewLine);

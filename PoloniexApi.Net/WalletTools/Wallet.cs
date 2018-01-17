@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Jojatekok.PoloniexAPI.General;
 using Newtonsoft.Json;
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
     public class Wallet
     {
-        private ApiWebClient ApiWebClient { get; set; }
-
         internal Wallet(ApiWebClient apiWebClient)
         {
             ApiWebClient = apiWebClient;
         }
+
+        private ApiWebClient ApiWebClient { get; }
 
         private Dictionary<string, Balance> GetBalances()
         {
@@ -23,11 +24,12 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             var data = PostData<Dictionary<string, Balance>>("returnCompleteBalances", postData);
             return data;
         }
-        
+
         private Dictionary<string, LendingBalance> GetAvailableAccountBalances(string account)
         {
-            var postData = new Dictionary<string, object> {
-                { "account", account },
+            var postData = new Dictionary<string, object>
+            {
+                {"account", account}
             };
 
             var data = PostData<Dictionary<string, object>>("returnAvailableAccountBalances", postData);
@@ -35,19 +37,19 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             if (!string.IsNullOrEmpty(account))
             {
                 var balance = data[account];
-                JsonSerializer js = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore};
+                var js = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore};
                 try
                 {
                     var balanceValue = js.DeserializeObject<LendingBalance>(balance.ToString());
-                    if (balanceValue is LendingBalance)
+                    if (balanceValue != null)
                     {
                         return new Dictionary<string, LendingBalance>
                         {
-                            { "lending", balanceValue}
+                            {"lending", balanceValue}
                         };
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     // ignore
                 }
@@ -60,7 +62,7 @@ namespace Jojatekok.PoloniexAPI.WalletTools
         {
             //TODO
             var postData = new Dictionary<string, object>();
-            
+
             return PostData<Dictionary<string, List<OpenLoanOffer>>>("returnOpenLoanOffers", postData);
         }
 
@@ -71,7 +73,7 @@ namespace Jojatekok.PoloniexAPI.WalletTools
             var data = PostData<ActiveLoanList>("returnActiveLoans", postData);
             return data;
         }
-        
+
         private Dictionary<string, string> GetDepositAddresses()
         {
             var postData = new Dictionary<string, object>();
@@ -82,9 +84,10 @@ namespace Jojatekok.PoloniexAPI.WalletTools
 
         private DepositWithdrawalList GetDepositsAndWithdrawals(DateTime startTime, DateTime endTime)
         {
-            var postData = new Dictionary<string, object> {
-                { "start", Helper.DateTimeToUnixTimeStamp(startTime) },
-                { "end", Helper.DateTimeToUnixTimeStamp(endTime) }
+            var postData = new Dictionary<string, object>
+            {
+                {"start", Helper.DateTimeToUnixTimeStamp(startTime)},
+                {"end", Helper.DateTimeToUnixTimeStamp(endTime)}
             };
 
             var data = PostData<DepositWithdrawalList>("returnDepositsWithdrawals", postData);
@@ -93,8 +96,9 @@ namespace Jojatekok.PoloniexAPI.WalletTools
 
         private GeneratedDepositAddress PostGenerateNewDepositAddress(string currency)
         {
-            var postData = new Dictionary<string, object> {
-                { "currency", currency }
+            var postData = new Dictionary<string, object>
+            {
+                {"currency", currency}
             };
 
             var data = PostData<GeneratedDepositAddress>("generateNewAddress", postData);
@@ -103,39 +107,43 @@ namespace Jojatekok.PoloniexAPI.WalletTools
 
         private void PostWithdrawal(string currency, double amount, string address, string paymentId)
         {
-            var postData = new Dictionary<string, object> {
-                { "currency", currency },
-                { "amount", amount.ToStringNormalized() },
-                { "address", address }
+            var postData = new Dictionary<string, object>
+            {
+                {"currency", currency},
+                {"amount", amount.ToStringNormalized()},
+                {"address", address}
             };
 
-            if (paymentId != null) {
+            if (paymentId != null)
+            {
                 postData.Add("paymentId", paymentId);
             }
 
             PostData<GeneratedDepositAddress>("withdraw", postData);
         }
-        
+
         private object CancelOpenLoanOffer(string orderNumber)
         {
-            var postData = new Dictionary<string, object> {
-                { "orderNumber", orderNumber },
+            var postData = new Dictionary<string, object>
+            {
+                {"orderNumber", orderNumber}
             };
-            
+
             return PostData<object>("cancelLoanOffer", postData);
         }
 
         private object CreateLoanOffer(CreateLoanOffer model)
         {
             //"currency", "amount", "duration", "autoRenew" (0 or 1), and "lendingRate"
-            var postData = new Dictionary<string, object> {
-                { "currency", model.Currency },
-                { "amount", model.Amount.ToString(new CultureInfo("en-us")) },
-                { "lendingRate", model.LendingRate.ToString(new CultureInfo("en-us")) },
-                { "duration", 2 },
-                { "autoRenew", 0 },
+            var postData = new Dictionary<string, object>
+            {
+                {"currency", model.Currency},
+                {"amount", model.Amount.ToString(new CultureInfo("en-us"))},
+                {"lendingRate", model.LendingRate.ToString(new CultureInfo("en-us"))},
+                {"duration", 2},
+                {"autoRenew", 0}
             };
-            
+
             return PostData<object>("createLoanOffer", postData);
         }
 
@@ -188,7 +196,7 @@ namespace Jojatekok.PoloniexAPI.WalletTools
         {
             return Task.Factory.StartNew(() => PostWithdrawal(currency, amount, address, null));
         }
-        
+
         public Task<object> CreateLoanOfferAsync(CreateLoanOffer model)
         {
             return Task<object>.Factory.StartNew(() => CreateLoanOffer(model));

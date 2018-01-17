@@ -2,13 +2,6 @@
 {
     public class Order
     {
-        public double PricePerCoin { get; private set; }
-
-        public double AmountQuote { get; private set; }
-        public double AmountBase {
-            get { return (AmountQuote * PricePerCoin).Normalize(); }
-        }
-
         internal Order(double pricePerCoin, double amountQuote)
         {
             PricePerCoin = pricePerCoin;
@@ -17,7 +10,12 @@
 
         internal Order()
         {
-
         }
+
+        public double PricePerCoin { get; }
+
+        public double AmountQuote { get; }
+
+        public double AmountBase => (AmountQuote * PricePerCoin).Normalize();
     }
 }

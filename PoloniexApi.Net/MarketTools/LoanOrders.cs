@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {

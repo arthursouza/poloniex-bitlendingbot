@@ -1,11 +1,8 @@
-﻿namespace Jojatekok.PoloniexAPI
+﻿namespace Jojatekok.PoloniexAPI.General
 {
     public class Authenticator : IAuthenticator
     {
-        private ApiWebClient ApiWebClient { get; set; }
-
-        public string PublicKey { get; set; }
-        public string PrivateKey { get; set; }
+        public ApiWebClient WebClient { get; }
 
         internal Authenticator(ApiWebClient apiWebClient, string publicKey, string privateKey) : this(apiWebClient)
         {
@@ -14,9 +11,12 @@
             apiWebClient.Authenticator = this;
         }
 
-        internal Authenticator(ApiWebClient apiWebClient)
+        private Authenticator(ApiWebClient apiWebClient)
         {
-            ApiWebClient = apiWebClient;
+            WebClient = apiWebClient;
         }
+
+        public string PublicKey { get; set; }
+        public string PrivateKey { get; set; }
     }
 }

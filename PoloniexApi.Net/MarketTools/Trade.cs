@@ -1,20 +1,25 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Jojatekok.PoloniexAPI.General;
+using Newtonsoft.Json;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
     public class Trade
     {
         [JsonProperty("date")]
-        private string TimeInternal {
+        private string TimeInternal
+        {
             set { Time = Helper.ParseDateTime(value); }
         }
+
         public DateTime Time { get; private set; }
 
         [JsonProperty("type")]
-        private string TypeInternal {
+        private string TypeInternal
+        {
             set { Type = value.ToOrderType(); }
         }
+
         public OrderType Type { get; private set; }
 
         [JsonProperty("rate")]
@@ -22,6 +27,7 @@ namespace Jojatekok.PoloniexAPI.MarketTools
 
         [JsonProperty("amount")]
         public double AmountQuote { get; private set; }
+
         [JsonProperty("total")]
         public double AmountBase { get; private set; }
     }

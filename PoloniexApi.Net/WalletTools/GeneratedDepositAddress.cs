@@ -5,9 +5,11 @@ namespace Jojatekok.PoloniexAPI.WalletTools
     public class GeneratedDepositAddress
     {
         [JsonProperty("success")]
-        private byte IsGenerationSuccessfulInternal {
+        private byte IsGenerationSuccessfulInternal
+        {
             set { IsGenerationSuccessful = value == 1; }
         }
+
         public bool IsGenerationSuccessful { get; private set; }
 
         [JsonProperty("response")]

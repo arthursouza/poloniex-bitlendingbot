@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Jojatekok.PoloniexAPI.MarketTools;
 using Jojatekok.PoloniexAPI.WalletTools;
 using Newtonsoft.Json;
@@ -22,7 +20,7 @@ namespace Jojatekok.PoloniexAPI
             }
             return new T();
         }
-        
+
         public static void SaveObject<T>(T entity, string jsonFile) where T : new()
         {
             var jsonObject = JsonConvert.SerializeObject(entity);

@@ -1,4 +1,4 @@
-﻿namespace Jojatekok.PoloniexAPI
+﻿namespace Jojatekok.PoloniexAPI.General
 {
     public interface IAuthenticator
     {

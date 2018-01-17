@@ -1,48 +1,52 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Jojatekok.PoloniexAPI.General;
+using Newtonsoft.Json.Linq;
 
 namespace Jojatekok.PoloniexAPI.TradingTools
 {
     public class Trading
     {
-        private ApiWebClient ApiWebClient { get; set; }
-
         internal Trading(ApiWebClient apiWebClient)
         {
             ApiWebClient = apiWebClient;
         }
 
+        private ApiWebClient ApiWebClient { get; }
+
         private List<Order> GetOpenOrders(CurrencyPair currencyPair)
         {
-            var postData = new Dictionary<string, object> {
-                { "currencyPair", currencyPair }
+            var postData = new Dictionary<string, object>
+            {
+                {"currencyPair", currencyPair}
             };
 
             var data = PostData<List<Order>>("returnOpenOrders", postData);
-            return (List<Order>)data;
+            return data;
         }
 
         private List<Trade> GetTrades(CurrencyPair currencyPair, DateTime startTime, DateTime endTime)
         {
-            var postData = new Dictionary<string, object> {
-                { "currencyPair", currencyPair },
-                { "start", Helper.DateTimeToUnixTimeStamp(startTime) },
-                { "end", Helper.DateTimeToUnixTimeStamp(endTime) }
+            var postData = new Dictionary<string, object>
+            {
+                {"currencyPair", currencyPair},
+                {"start", Helper.DateTimeToUnixTimeStamp(startTime)},
+                {"end", Helper.DateTimeToUnixTimeStamp(endTime)}
             };
 
             var data = PostData<List<Trade>>("returnTradeHistory", postData);
-            return (List<Trade>)data;
+            return data;
         }
 
         private ulong PostOrder(CurrencyPair currencyPair, OrderType type, double pricePerCoin, double amountQuote)
         {
-            var postData = new Dictionary<string, object> {
-                { "currencyPair", currencyPair },
-                { "rate", pricePerCoin.ToStringNormalized() },
-                { "amount", amountQuote.ToStringNormalized() }
+            var postData = new Dictionary<string, object>
+            {
+                {"currencyPair", currencyPair},
+                {"rate", pricePerCoin.ToStringNormalized()},
+                {"amount", amountQuote.ToStringNormalized()}
             };
 
             var data = PostData<JObject>(type.ToStringNormalized(), postData);
@@ -51,9 +55,10 @@ namespace Jojatekok.PoloniexAPI.TradingTools
 
         private bool DeleteOrder(CurrencyPair currencyPair, ulong orderId)
         {
-            var postData = new Dictionary<string, object> {
-                { "currencyPair", currencyPair },
-                { "orderNumber", orderId }
+            var postData = new Dictionary<string, object>
+            {
+                {"currencyPair", currencyPair},
+                {"orderNumber", orderId}
             };
 
             var data = PostData<JObject>("cancelOrder", postData);

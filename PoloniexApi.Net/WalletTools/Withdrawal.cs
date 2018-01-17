@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Jojatekok.PoloniexAPI.WalletTools
 {
@@ -10,16 +10,21 @@ namespace Jojatekok.PoloniexAPI.WalletTools
 
         [JsonProperty("currency")]
         public string Currency { get; private set; }
+
         [JsonProperty("address")]
         public string Address { get; private set; }
+
         [JsonProperty("amount")]
         public double Amount { get; private set; }
 
         [JsonProperty("timestamp")]
-        private ulong TimeInternal {
+        private ulong TimeInternal
+        {
             set { Time = Helper.UnixTimeStampToDateTime(value); }
         }
+
         public DateTime Time { get; private set; }
+
         [JsonProperty("ipAddress")]
         public string IpAddress { get; private set; }
 

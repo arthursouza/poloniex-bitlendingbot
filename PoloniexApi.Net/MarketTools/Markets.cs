@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Jojatekok.PoloniexAPI.General;
 
 namespace Jojatekok.PoloniexAPI.MarketTools
 {
     public class Markets
     {
-        private ApiWebClient ApiWebClient { get; set; }
-
         internal Markets(ApiWebClient apiWebClient)
         {
             ApiWebClient = apiWebClient;
         }
+
+        private ApiWebClient ApiWebClient { get; }
 
         private IDictionary<CurrencyPair, MarketData> GetSummary()
         {
             var data = GetData<IDictionary<string, MarketData>>("returnTicker");
             return data.ToDictionary(
                 x => CurrencyPair.Parse(x.Key),
-                x => (MarketData)x.Value
+                x => x.Value
             );
         }
 
@@ -70,7 +71,7 @@ namespace Jojatekok.PoloniexAPI.MarketTools
                 "currencyPair=" + currencyPair,
                 "start=" + Helper.DateTimeToUnixTimeStamp(startTime),
                 "end=" + Helper.DateTimeToUnixTimeStamp(endTime),
-                "period=" + (int)period
+                "period=" + (int) period
             );
             return new List<MarketChartData>(data);
         }

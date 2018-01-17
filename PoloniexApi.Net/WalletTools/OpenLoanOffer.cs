@@ -20,12 +20,16 @@ namespace Jojatekok.PoloniexAPI.WalletTools
 
         [JsonProperty("id")]
         public int Id { get; private set; }
+
         [JsonProperty("rate")]
         public double Double { get; private set; }
+
         [JsonProperty("amount")]
         public double Amount { get; private set; }
+
         [JsonProperty("duration")]
         public double Duration { get; private set; }
+
         [JsonProperty("autoRenew")]
         public bool AutoRenew { get; private set; }
     }

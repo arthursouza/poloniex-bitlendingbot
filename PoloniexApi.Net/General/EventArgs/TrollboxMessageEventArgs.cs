@@ -1,14 +1,7 @@
-﻿using System;
-
-namespace Jojatekok.PoloniexAPI
+﻿namespace Jojatekok.PoloniexAPI.General.EventArgs
 {
-    public class TrollboxMessageEventArgs : EventArgs
+    public class TrollboxMessageEventArgs : System.EventArgs
     {
-        public string SenderName { get; private set; }
-        public uint? SenderReputation { get; private set; }
-        public ulong MessageNumber { get; private set; }
-        public string MessageText { get; private set; }
-
         internal TrollboxMessageEventArgs(string senderName, uint? senderReputation, ulong messageNumber, string messageText)
         {
             SenderName = senderName;
@@ -16,5 +9,10 @@ namespace Jojatekok.PoloniexAPI
             MessageNumber = messageNumber;
             MessageText = messageText;
         }
+
+        public string SenderName { get; }
+        public uint? SenderReputation { get; }
+        public ulong MessageNumber { get; }
+        public string MessageText { get; }
     }
 }

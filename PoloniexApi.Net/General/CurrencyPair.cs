@@ -1,17 +1,17 @@
-﻿namespace Jojatekok.PoloniexAPI
+﻿namespace Jojatekok.PoloniexAPI.General
 {
     public class CurrencyPair
     {
         private const char SeparatorCharacter = '_';
-
-        public string BaseCurrency { get; private set; }
-        public string QuoteCurrency { get; private set; }
 
         public CurrencyPair(string baseCurrency, string quoteCurrency)
         {
             BaseCurrency = baseCurrency;
             QuoteCurrency = quoteCurrency;
         }
+
+        public string BaseCurrency { get; }
+        public string QuoteCurrency { get; }
 
         public static CurrencyPair Parse(string currencyPair)
         {
@@ -26,8 +26,14 @@
 
         public static bool operator ==(CurrencyPair a, CurrencyPair b)
         {
-            if (ReferenceEquals(a, b)) return true;
-            if ((object)a == null ^ (object)b == null) return false;
+            if (ReferenceEquals(a, b))
+            {
+                return true;
+            }
+            if (((object) a == null) ^ ((object) b == null))
+            {
+                return false;
+            }
 
             return a.BaseCurrency == b.BaseCurrency && a.QuoteCurrency == b.QuoteCurrency;
         }
@@ -40,7 +46,7 @@
         public override bool Equals(object obj)
         {
             var b = obj as CurrencyPair;
-            return (object)b != null && Equals(b);
+            return (object) b != null && Equals(b);
         }
 
         public bool Equals(CurrencyPair b)

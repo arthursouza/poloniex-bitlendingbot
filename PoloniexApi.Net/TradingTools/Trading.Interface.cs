@@ -1,28 +1,40 @@
-﻿using Jojatekok.PoloniexAPI.TradingTools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Jojatekok.PoloniexAPI.General;
 
-namespace Jojatekok.PoloniexAPI
+namespace Jojatekok.PoloniexAPI.TradingTools
 {
     public interface ITrading
     {
         /// <summary>Fetches the current open orders in your account, ordered by most recent first.</summary>
-        /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
+        /// <param name="currencyPair">
+        ///     The currency pair, which consists of the currency being traded on the market, and the base's
+        ///     code.
+        /// </param>
         Task<List<IOrder>> GetOpenOrdersAsync(CurrencyPair currencyPair);
 
         /// <summary>Fetches the trades made in your account, ordered by most recent first.</summary>
-        /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
+        /// <param name="currencyPair">
+        ///     The currency pair, which consists of the currency being traded on the market, and the base's
+        ///     code.
+        /// </param>
         Task<List<ITrade>> GetTradesAsync(CurrencyPair currencyPair);
 
         /// <summary>Fetches the trades made in your account in a given time period, ordered by most recent first.</summary>
-        /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
+        /// <param name="currencyPair">
+        ///     The currency pair, which consists of the currency being traded on the market, and the base's
+        ///     code.
+        /// </param>
         /// <param name="startTime">The time to start fetching data from.</param>
         /// <param name="endTime">The time to stop fetching data at.</param>
         Task<List<ITrade>> GetTradesAsync(CurrencyPair currencyPair, DateTime startTime, DateTime endTime);
 
         /// <summary>Submits a new order to the market.</summary>
-        /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
+        /// <param name="currencyPair">
+        ///     The currency pair, which consists of the currency being traded on the market, and the base's
+        ///     code.
+        /// </param>
         /// <param name="type">Type of the order.</param>
         /// <param name="pricePerCoin">The price to trade your coins at, compared to the base currency.</param>
         /// <param name="amountQuote">The amount of quote you want to trade.</param>
@@ -30,9 +42,15 @@ namespace Jojatekok.PoloniexAPI
 
         /// <summary>
         ///     <para>Cancels an open order identified by the order ID.</para>
-        ///     <para>Warning: Order cancellations are processed FIFO (First In First Out) alongside new orders, so it may be matched before the cancellation can be processed.</para>
+        ///     <para>
+        ///         Warning: Order cancellations are processed FIFO (First In First Out) alongside new orders, so it may be
+        ///         matched before the cancellation can be processed.
+        ///     </para>
         /// </summary>
-        /// <param name="currencyPair">The currency pair, which consists of the currency being traded on the market, and the base's code.</param>
+        /// <param name="currencyPair">
+        ///     The currency pair, which consists of the currency being traded on the market, and the base's
+        ///     code.
+        /// </param>
         /// <param name="orderId">The ID of the order to cancel.</param>
         Task<bool> DeleteOrderAsync(CurrencyPair currencyPair, ulong orderId);
     }

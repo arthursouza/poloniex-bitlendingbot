@@ -1,4 +1,6 @@
-﻿namespace Jojatekok.PoloniexAPI.TradingTools
+﻿using Jojatekok.PoloniexAPI.General;
+
+namespace Jojatekok.PoloniexAPI.TradingTools
 {
     public interface IOrder
     {

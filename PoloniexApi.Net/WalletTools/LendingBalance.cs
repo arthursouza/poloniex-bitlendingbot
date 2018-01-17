@@ -5,6 +5,6 @@ namespace Jojatekok.PoloniexAPI.WalletTools
     public class LendingBalance
     {
         [JsonProperty("BTC")]
-        public double? BTC { get; set; }
+        public double? Btc { get; set; }
     }
 }

@@ -6,7 +6,6 @@ namespace Jojatekok.PoloniexAPI.MarketTools
     {
         internal LoanOrder()
         {
-
         }
 
         public DateTime Date { get; set; }

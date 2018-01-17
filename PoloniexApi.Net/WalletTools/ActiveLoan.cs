@@ -51,8 +51,8 @@ namespace Jojatekok.PoloniexAPI.WalletTools
 
         [JsonProperty("date")]
         public DateTime Date { get; private set; }
-        
+
         [JsonProperty("fees")]
-        public double Fees{ get; private set; }
+        public double Fees { get; private set; }
     }
 }

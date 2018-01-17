@@ -1,6 +1,4 @@
-﻿using Jojatekok.PoloniexAPI.MarketTools;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -9,6 +7,9 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Reflection;
+using Jojatekok.PoloniexAPI.General;
+using Jojatekok.PoloniexAPI.MarketTools;
+using Newtonsoft.Json;
 
 namespace Jojatekok.PoloniexAPI
 {
@@ -32,11 +33,17 @@ namespace Jojatekok.PoloniexAPI
 
         internal static string GetResponseString(this HttpWebRequest request)
         {
-            using (var response = request.GetResponse()) {
-                using (var stream = response.GetResponseStream()) {
-                    if (stream == null) throw new NullReferenceException("The HttpWebRequest's response stream cannot be empty.");
+            using (var response = request.GetResponse())
+            {
+                using (var stream = response.GetResponseStream())
+                {
+                    if (stream == null)
+                    {
+                        throw new NullReferenceException("The HttpWebRequest's response stream cannot be empty.");
+                    }
 
-                    using (var reader = new StreamReader(stream)) {
+                    using (var reader = new StreamReader(stream))
+                    {
                         return reader.ReadToEnd();
                     }
                 }
@@ -46,9 +53,11 @@ namespace Jojatekok.PoloniexAPI
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public static T DeserializeObject<T>(this JsonSerializer serializer, string value)
         {
-            using (var stringReader = new StringReader(value)) {
-                using (var jsonTextReader = new JsonTextReader(stringReader)) {
-                    return (T)serializer.Deserialize(jsonTextReader, typeof(T));
+            using (var stringReader = new StringReader(value))
+            {
+                using (var jsonTextReader = new JsonTextReader(stringReader))
+                {
+                    return (T) serializer.Deserialize(jsonTextReader, typeof(T));
                 }
             }
         }
@@ -56,11 +65,15 @@ namespace Jojatekok.PoloniexAPI
         internal static string ToHttpPostString(this Dictionary<string, object> dictionary)
         {
             var output = string.Empty;
-            foreach (var entry in dictionary) {
+            foreach (var entry in dictionary)
+            {
                 var valueString = entry.Value as string;
-                if (valueString == null) {
+                if (valueString == null)
+                {
                     output += "&" + entry.Key + "=" + entry.Value;
-                } else {
+                }
+                else
+                {
                     output += "&" + entry.Key + "=" + valueString.Replace(' ', '+');
                 }
             }
@@ -70,7 +83,8 @@ namespace Jojatekok.PoloniexAPI
 
         internal static string ToStringNormalized(this OrderType value)
         {
-            switch (value) {
+            switch (value)
+            {
                 case OrderType.Buy:
                     return "buy";
 
@@ -83,7 +97,8 @@ namespace Jojatekok.PoloniexAPI
 
         internal static OrderType ToOrderType(this string value)
         {
-            switch (value) {
+            switch (value)
+            {
                 case "buy":
                     return OrderType.Buy;
 
@@ -107,24 +122,27 @@ namespace Jojatekok.PoloniexAPI
         public static string ToStringHex(this byte[] value)
         {
             var output = string.Empty;
-            for (var i = 0; i < value.Length; i++) {
+            for (var i = 0; i < value.Length; i++)
+            {
                 output += value[i].ToString("x2", InvariantCulture);
             }
 
-            return (output);
+            return output;
         }
 
         public static double[] GetBollingerBandsWithSimpleMovingAverage(this List<MarketChartData> value, int index, int period = 20)
         {
             var closes = new List<double>(period);
-            for (var i = index; i > Math.Max(index - period, -1); i--) {
+            for (var i = index; i > Math.Max(index - period, -1); i--)
+            {
                 closes.Add(value[i].Close);
             }
 
             var simpleMovingAverage = closes.Average();
             var stDevMultiplied = Math.Sqrt(closes.Average(x => Math.Pow(x - simpleMovingAverage, 2))) * 2;
 
-            return new[] {
+            return new[]
+            {
                 simpleMovingAverage,
                 simpleMovingAverage + stDevMultiplied,
                 simpleMovingAverage - stDevMultiplied
@@ -138,7 +156,7 @@ namespace Jojatekok.PoloniexAPI
 
         internal static ulong DateTimeToUnixTimeStamp(DateTime dateTime)
         {
-            return (ulong)Math.Floor(dateTime.Subtract(DateTimeUnixEpochStart).TotalSeconds);
+            return (ulong) Math.Floor(dateTime.Subtract(DateTimeUnixEpochStart).TotalSeconds);
         }
 
         internal static DateTime ParseDateTime(string dateTime)
@@ -149,9 +167,12 @@ namespace Jojatekok.PoloniexAPI
         internal static string GetCurrentHttpPostNonce()
         {
             var newHttpPostNonce = new BigInteger(Math.Round(DateTime.UtcNow.Subtract(DateTimeUnixEpochStart).TotalMilliseconds * 1000, MidpointRounding.AwayFromZero));
-            if (newHttpPostNonce > CurrentHttpPostNonce) {
+            if (newHttpPostNonce > CurrentHttpPostNonce)
+            {
                 CurrentHttpPostNonce = newHttpPostNonce;
-            } else {
+            }
+            else
+            {
                 CurrentHttpPostNonce += 1;
             }
 
